@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Database
+  db:
+    image: postgres:15-alpine
+    container_name: ksm_invoice_db
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secretpassword   # Change this in production
+      POSTGRES_DB: ksm_invoice
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ksm_network
+
+  # Redis for session/cache
+  redis:
+    image: redis:7-alpine
+    container_name: ksm_invoice_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - ksm_network
+
+  # Go Fiber Backend
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ksm_invoice_backend
+    restart: always
+    depends_on:
+      - db
+      - redis
+    # Map port 8081 inside container to 8081 on host
+    ports:
+      - "8081:8081"
+    environment:
+      - DEV_MODE=false
+      - SERVER_PORT=8081
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=root
+      - DB_PASSWORD=secretpassword
+      - DB_NAME=ksm_invoice
+      - JWT_SECRET=super_secret_ksm_invoice_key_2026
+      - COST_CONTROL_API_URL=http://localhost:8080 # Update this when cost control is deployed
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - ksm_network
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ksm_invoice_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      # Change API_URL to match the public IP or domain of your staging server
+      # Next.js server-side can use internal network
+      - NEXT_PUBLIC_API_URL=http://localhost:8081
+    networks:
+      - ksm_network
+
+# Named volumes for persistence
+volumes:
+  pgdata:
+  redisdata:
+  backend_uploads:
+
+networks:
+  ksm_network:
+    driver: bridge
