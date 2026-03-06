@@ -19,6 +19,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Pass build args to Next.js build process
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+ARG NEXT_PUBLIC_IS_STAGING
+ENV NEXT_PUBLIC_IS_STAGING=$NEXT_PUBLIC_IS_STAGING
+
 # Install pnpm
 RUN corepack enable pnpm
 
