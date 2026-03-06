@@ -71,7 +71,8 @@ services:
     environment:
       # Change API_URL to match the public IP or domain of your staging server
       # Next.js server-side can use internal network
-      - NEXT_PUBLIC_API_URL=http://localhost:8081
+      - NEXT_PUBLIC_API_URL=http://ksm-invoice.ptkiansantang.com:8081
+      - NEXT_PUBLIC_IS_STAGING=true
     networks:
       - ksm_network
 
