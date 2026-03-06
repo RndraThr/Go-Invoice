@@ -1,0 +1,23 @@
+# Env files
+.env
+.env.*
+!.env.example
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build & tmp files
+*.exe
+temp_build*
+frontend/.next/
+frontend/node_modules/
+
+# OS generated
+.DS_Store
+Thumbs.db
